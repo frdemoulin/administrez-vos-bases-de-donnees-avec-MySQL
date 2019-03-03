@@ -1,4 +1,4 @@
-# 01 - Rappels et introduction
+# [01 - Rappels et introduction](https://openclassrooms.com/fr/courses/1959476-administrez-vos-bases-de-donnees-avec-mysql/1966033-rappels-et-introduction)
 
 ## 1. Rappels et manipulation simple de nombres
 
@@ -95,7 +95,7 @@ On distingue deux types de fonctions : les fonctions scalaires et les fonctions 
 SELECT nom, prix, ROUND(prix) FROM Race;
 ```
 
-Ll y a sept races dans la table `Race`. Lorsqu'on applique la fonction `ROUND(X)` à la colonne `prix`, on récupère bien sept lignes.
+Il y a sept races dans la table `Race`. Lorsqu'on applique la fonction `ROUND(X)` à la colonne `prix`, on récupère donc sept lignes.
 
 ![capture01](https://user-images.githubusercontent.com/1475600/53686781-0566f680-3d2c-11e9-8f00-6838c5ff372a.PNG)
 
@@ -108,8 +108,92 @@ SELECT MIN(prix) FROM Race;
 
 ![capture02](https://user-images.githubusercontent.com/1475600/53686783-17489980-3d2c-11e9-98dc-a1fd69bf9655.PNG)
 
-On ne récupère qu'une seule ligne de résultat. Les sept races ont été regroupées (cela n'aurait d'ailleurs pas de sens d'avoir une ligne par race).
+On ne récupère qu'une seule ligne de résultat. Les sept races ont été regroupées (cela n'aurait pas de sens d'avoir une ligne par race).
 
-Cette particularité des fonctions d'agrégation les rend un peu plus délicates à utiliser, mais offre des possibilités vraiment intéressantes.
+Cette particularité des fonctions d'agrégation les rend un peu plus délicates à utiliser, mais offre des possibilités ntéressantes.
 
 ## 3. Quelques fonctions générales
+
+### 3.1. Informations sur l'environnement actuel
+
+#### Version de MySQL
+
+`VERSION()` affiche la version de MySQL installée sur le serveur.
+
+#### Utilisateurs
+
+`CURRENT_USER()` : renvoie l'utilisateur (et l'hôte) qui a été utilisé lors de l'identification au serveur
+
+`USER()` : renvoie l'utilisateur (et l'hôte) qui a été spécifié lors de l'identification au serveur
+
+### 3.2. Informations sur la dernière requête
+
+#### Dernier ID généré par auto-incrémentation
+
+`LAST_INSERT_ID()` : renvoie le dernier id créé par auto-incrémentation, pour la connexion utilisée (donc si quelqu'un se connecte au même serveur, avec un autre client, il n'influera pas sur le `LAST_INSERT_ID()` que vous recevrez)
+
+**Exemple :** ajouter Pipo le rottweiller dans la base. Pour ce faire, on insère une nouvelle race (rottweiller), puis un nouvel animal (Pipo) pour lequel on a besoin de l'id de la nouvelle race
+
+```sql
+# insertion de la race Rottweiler dans la table Race
+INSERT INTO Race (nom, espece_id, description, prix) VALUES ('Rottweiller', 1, 'Chien d''apparence solide, bien musclé, à la robe noire avec des taches feu bien délimitées.', 600.00);
+
+# insertion d'un nouvel animal (Pipo le rottweiller)
+INSERT INTO Animal (sexe, date_naissance, nom, espece_id, race_id) VALUES ('M', '2010-11-05', 'Pipo', 1, LAST_INSERT_ID()); -- LAST_INSERT_ID() renverra ici l'id de la race Rottweiller
+```
+
+#### Nombre de lignes renvoyées par la requête
+
+`FOUND_ROWS()` : affiche le nombre de lignes que la dernière requête a rapportées
+
+```sql
+SELECT id, nom, espece_id, prix 
+FROM Race;
+
+SELECT FOUND_ROWS();
+```
+
+option `SQL_CALC_FOUND_ROWS` avec `LIMIT` : placée juste après le mot-clé `SELECT`, donne le nombre de lignes que la requête aurait rapportées en l'absence de `LIMIT`
+
+```sql
+SELECT id, nom, espece_id, prix -- Sans option
+FROM Race 
+LIMIT 3;              
+         
+SELECT FOUND_ROWS() AS sans_option;
+
+SELECT SQL_CALC_FOUND_ROWS id, nom, espece_id, prix -- Avec option
+FROM Race 
+LIMIT 3; 
+
+SELECT FOUND_ROWS() AS avec_option;
+```
+
+### 3.3. Convertir le type de données
+
+#### Conversions automatiques
+
+MySQL est assez permissif au sujet des conversions de type de données.
+
+**Exemples :**
+
+```sql
+# la colonne id est de type INT. Pourtant, la comparaison avec une chaîne de caractères renvoie bien un résultat
+SELECT * FROM Espece WHERE id = '3';
+
+# la colonne prix est de type DECIMAL, mais l'insertion d'une valeur sous forme de chaîne de caractères ne pose pas de problème
+INSERT INTO Espece (nom_latin, nom_courant, description, prix)
+VALUES ('Rattus norvegicus', 'Rat brun', 'Petite bestiole avec de longues moustaches et une longue queue sans poils', '10.00');
+```
+
+#### Conversions forcées
+
+Fonction `CAST(expr AS type)` : `expr` représente la donnée à convertir et `type` le type vers lequel convertir la donnée.
+
+Ce type peut être : `BINARY`, `CHAR`, `DATE`, `DATETIME`, `TIME`, `UNSIGNED` (sous-entendu `INT`), `SIGNED` (sous-entendu `INT`), `DECIMAL`.
+
+**Exemple :** conversion d'une chaîne de caractères en date
+
+```sql
+SELECT CAST('870303' AS DATE);
+```
