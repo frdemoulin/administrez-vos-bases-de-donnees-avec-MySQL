@@ -2,4 +2,18 @@
 
 ## 1. Du simple
 
+1. Combien de races avons-nous dans la table Race ?
+
+    ```sql
+    SELECT COUNT(*) AS nb_races FROM Race;
+    ```
+
+1. De combien de chiens connaissons-nous le père ?
+
+    ```sql
+    SELECT nom, nom_courant, COUNT(pere_id) AS nb_chiens FROM Animal
+    INNER JOIN Espece ON Espece.id = Animal.espece_id
+    WHERE nom_courant = 'Chien';
+    ```
+
 ## 2. Au compliqué
