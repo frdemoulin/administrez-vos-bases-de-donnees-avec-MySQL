@@ -37,8 +37,8 @@ Activité : Créez la base de données de votre blog
 1. [Rappels et introduction](III-fonctions-nombres-chaines-agregats/01-rappels-et-introduction.md)
 2. [Fonctions scalaires](III-fonctions-nombres-chaines-agregats/02-fonctions-scalaires.md)
 3. [Fonctions d'agrégation](III-fonctions-nombres-chaines-agregats/03-fonctions-d'agregation.md)
-4. Regroupement
-5. Exercices sur les agrégats
+4. [Regroupement](III-fonctions-nombres-chaines-agregats/04-regroupement.md)
+5. [Exercices sur les agrégats](III-fonctions-nombres-chaines-agregats/05-exercices-sur-les-agregats.md)
 
 Quiz : Fonctions : nombres, chaînes et agrégats
 

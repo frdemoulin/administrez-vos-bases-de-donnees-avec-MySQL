@@ -19,7 +19,7 @@ FROM nom_table
 GROUP BY nom_colonne;
 ```
 
-:pencil: **Exemple 1 :** compter les lignes dans la table Animal en regroupant sur le critère de l'espèce (donc avec la colonne espece_id)
+:pencil: **Exemple 1 :** compter les lignes dans la table Animal en regroupant sur le critère de l'espèce (donc avec la colonne `espece_id`)
 
 ```sql
 SELECT COUNT(*) AS nb_animaux FROM Animal
@@ -37,7 +37,7 @@ GROUP BY espece_id;
 :pencil: **Exemple 2 :** compter les lignes dans la table Animal en regroupant sur le critère de l'espèce et en ne prenant en compte que les mâles
 
 ```sql
-SELECT COUNT(*) AS nb_animaux FROM Animal
+SELECT COUNT(*) AS nb_males FROM Animal
 WHERE sexe = 'M'
 GROUP BY espece_id;
 ```
@@ -88,7 +88,7 @@ Lors d'un groupement dans une requête avec `GROUP BY`, on ne peut sélectionner
 * une ou des colonnes ayant servi de critère pour le regroupement ;
 * une fonction d'agrégation (agissant sur n'importe quelle colonne).
 
-:pencil: **Exemple :** une espèce n'ayant pas de date de naissance, la requête suivante n'a pas de sens. En effet, chaque ligne représente une espèce. Il en est de même pour les colonnes sexe ou commentaires.
+Une espèce n'ayant pas de date de naissance, la requête suivante n'a pas de sens. En effet, chaque ligne représente une espèce. Il en est de même pour les colonnes sexe ou commentaires.
 
 ```sql
 SELECT nom_courant, COUNT(*) AS nb_animaux, date_naissance
@@ -97,9 +97,9 @@ INNER JOIN Espece ON Animal.espece_id = Espece.id
 GROUP BY nom_courant;
 ```
 
-Afin d'éviter les erreurs précédentes, par sécurité, **la sélection de colonnes n'étant pas dans les critères de groupement est interdite**.
+Afin d'éviter l'erreur précédente, par sécurité, **la sélection de colonnes n'étant pas dans les critères de groupement est interdite**.
 
-:pencil: **Exemple :** afficher l'id de l'espèce, son nom et son nom latin à côté du nombre d'animaux de chaque groupement. Afin de respecter la règle précédente, on groupe sur 3 colonnes
+:pencil: **Exemple :** afficher l'id de l'espèce, son nom et son nom latin à côté du nombre d'animaux de chaque groupement (afin de respecter la règle précédente, on groupe sur 3 colonnes)
 
 ```sql
 SELECT Espece.id, nom_courant, Espece.nom_latin, COUNT(*) AS nb_animaux FROM Animal
@@ -144,7 +144,7 @@ ORDER BY nb_animaux;
 
 On effectue une jointure externe, puisqu'il faut tenir compte de toutes les espèces, même de celles n'ayant pas de correspondance dans la table `Animal`.
 
-:pencil: **Exemple :** afficher le nombre d'animaux pour chaque espèce même pour celles n'étant pas possédées par l'élevage
+:pencil: **Exemple :** afficher le nombre d'animaux pour chaque espèce, même pour celles n'étant pas possédées par l'élevage
 
 ```sql
 SELECT Espece.nom_courant, COUNT(Animal.espece_id) AS nb_animaux
@@ -163,7 +163,7 @@ GROUP BY nom_courant;
 
 Il est possible de grouper sur plusieurs colonnes, mais jusqu'à présent, cela n'a servi qu'à pouvoir afficher correctement les colonnes voulues sans que cela n'influe sur les groupes. On n'avait donc qu'un seul critère représenté par plusieurs colonnes. Voyons un exemple avec deux critères différents (qui ne créent pas les mêmes groupes).
 
-:pencil: **Exemple :** savoir combien d'animaux de chaque espèce sont présents dans la table Animal, ainsi que les nombres de mâles et de femelles, toutes espèces confondues.
+:pencil: **Exemple :** déterminer le nombre d'animaux de chaque espèce présents dans la table Animal, ainsi que les nombres de mâles et de femelles, toutes espèces confondues.
 
 ```sql
 -- nombre d'animaux regroupés par espèce
@@ -180,7 +180,7 @@ En faisant un regroupement multicritère, il est possible de déterminer le nomb
 
 :warning: L'ordre des critères a son importance !
 
-On regroupe d'abord sur l'espèce, puis sur le sexe :
+En regroupant d'abord sur l'espèce, puis sur le sexe :
 
 ```sql
 SELECT nom_courant, sexe, COUNT(*) AS nb_animaux FROM Animal
@@ -201,7 +201,7 @@ En regroupant d'abord sur le sexe, puis sur l'espèce :
 SELECT nom_courant, sexe, COUNT(*) as nb_animaux
 FROM Animal
 INNER JOIN Espece ON Espece.id = Animal.espece_id
-GROUP BY sexe,nom_courant;
+GROUP BY sexe, nom_courant;
 ```
 
 <details>
@@ -212,4 +212,149 @@ GROUP BY sexe,nom_courant;
 
 ## 3. Super-agrégats
 
+L'option `WITH ROLLUP` de `GROUP BY` affiche des lignes supplémentaires dans la table de résultats, représentant des "super-groupes" (ou super-agrégats), i.e. des "groupes de groupes".
+
+### 3.1. Avec un critère de regroupement
+
+:pencil: **Exemple :** afficher le nombre d'animaux par espèce, ainsi que le nombre total d'animaux
+
+```sql
+SELECT nom_courant, COUNT(*) AS nb_animaux FROM Animal
+INNER JOIN Espece ON Espece.id = Animal.espece_id
+GROUP BY nom_courant WITH ROLLUP;
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![regroupement_with_rollup](https://user-images.githubusercontent.com/1475600/53735674-e67d7700-3e87-11e9-84ce-a09e157ce0f3.PNG)
+</details>
+<br/>
+
+La ligne supplémentaire `NULL 60` représente le regroupement des quatre groupes basé sur le critère `GROUP BY nom_courant` (60 correspond ainsi au nombre total d'animaux dans ces quatre groupes).
+
+### 3.2. Avec deux critères de regroupement
+
+:pencil: **Exemple :**
+
+```sql
+SELECT nom_courant, sexe, COUNT(*) AS nb_animaux FROM Animal
+INNER JOIN Espece ON Espece.id = Animal.espece_id
+WHERE sexe IS NOT NULL
+GROUP BY nom_courant, sexe WITH ROLLUP;
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![regroupement_with_rollup_sexe_nom](https://user-images.githubusercontent.com/1475600/53735876-758a8f00-3e88-11e9-836f-965719597efe.PNG)
+</details>
+<br/>
+
+**Explications :**
+
+:small_blue_diamond: Les deux premières lignes correspondent aux nombres de chats mâles et femelles.
+
+:small_blue_diamond: La troisième ligne est une ligne insérée par `WITH ROLLUP`, elle indique le nombre de chats (mâles et femelles).
+
+>On a fait des groupes en séparant les espèces et les sexes, et `WITH ROLLUP` a créé des "super-groupes" en regroupant les sexes, mais en gardant les espèces séparées.
+
+:small_blue_diamond: Le résultat de la requête indique également le nombre de chiens à la sixième ligne, de perroquets à la neuvième et de tortues à la douzième.
+
+:small_blue_diamond: La toute dernière ligne est un "super-super-groupe" réunissant tous les groupes ensemble (nombre total d'animaux ayant un genre déterminé, i.e. `NOT NULL`).
+
+:warning: L'ordre des critères est important ! En échangeant les critères `nom_courant` et `sexe`, les super-groupes ne correspondent pas aux espèces, mais aux sexes, c'est-à-dire au premier critère. Le regroupement se fait bien dans l'ordre donné par les critères.
+
+```sql
+SELECT nom_courant, sexe, COUNT(*) AS nb_animaux FROM Animal
+INNER JOIN Espece ON Espece.id = Animal.espece_id
+WHERE sexe IS NOT NULL
+GROUP BY sexe, nom_courant WITH ROLLUP;
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![regroupement_with_rollup_sexe_nom_courant](https://user-images.githubusercontent.com/1475600/53739305-bb982080-3e91-11e9-9a2b-f48403648572.PNG)
+</details>
+
+### 3.3. NULL, c'est pas joli
+
+Il est possible de ne pas afficher `NULL` dans les lignes des super-groupes en utilisant la fonction `COALESCE()`. Elle prend autant de paramètres que l'on veut et renvoie le premier paramètre `NOT NULL`.
+
+:pencil: **Exemple :**
+
+```sql
+SELECT COALESCE(1, NULL, 3, 4); -- affiche 1
+SELECT COALESCE(NULL, 2);       -- affiche 2
+SELECT COALESCE(NULL, NULL, 3); -- affiche 3
+```
+
+Dans le cas des super-agrégats de l'élevage :
+
+```sql
+SELECT COALESCE(nom_courant, 'Total'), COUNT(*) AS nb_animaux FROM Animal
+INNER JOIN Espece ON Espece.id = Animal.espece_id
+GROUP BY nom_courant WITH ROLLUP;
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![regroupement_coalesce](https://user-images.githubusercontent.com/1475600/53740022-7e349280-3e93-11e9-8c8c-f0b18e5a5576.PNG)
+</details>
+<br/>
+
+**Explications :**
+
+:small_blue_diamond: Pour les groupes simples, `nom_courant` contient bien le nom de l'espèce, `COALESCE()` renvoie donc celui-ci.
+
+:small_blue_diamond: Pour les super-groupes, la colonne `nom_courant` du résultat contient `NULL`, `COALESCE()` va donc renvoyer "Total".
+
+>En utilisant `COALESCE()` dans ce genre de situation, il est impératif que les critères de regroupement ne contiennent pas `NULL` (ou que ces lignes-là soient éliminées). Sinon, "Total" s'affichera à des lignes qui ne sont pas des super-groupes.
+
 ## 4. Conditions sur les fonctions d'agrégation
+
+Pour faire des conditions sur une fonction d'agrégation, on utilise la clause `HAVING` à placer juste après `GROUP BY`.
+
+:warning: La clause `WHERE` ne s'applique pas à une fonction d'agrégation
+
+:pencil: **Exemple :** afficher uniquement les espèces dont on possède plus de 15 individus
+
+```sql
+SELECT nom_courant, COUNT(*) AS nombre FROM Animal
+INNER JOIN Espece ON Espece.id = Animal.espece_id
+GROUP BY nom_courant
+HAVING COUNT(*) > 15;
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![regroupement_having](https://user-images.githubusercontent.com/1475600/53741171-13388b00-3e96-11e9-86a2-71aaeba433f0.PNG)
+</details>
+
+### Optimisation
+
+Les conditions données dans la clause `HAVING` ne doivent pas nécessairement comporter une fonction d'agrégation. Les deux requêtes suivantes donneront des résultats équivalents :
+
+```sql
+-- Affiche les animaux groupés par espèce, dont le nom courant commence par C et d'effectifs supérieurs à 6
+SELECT nom_courant, COUNT(*) as nombre
+FROM Animal
+INNER JOIN Espece ON Espece.id = Animal.espece_id
+GROUP BY nom_courant
+HAVING nombre > 6 AND SUBSTRING(nom_courant, 1, 1) = 'C'; 
+    -- Deux conditions dans HAVING
+
+SELECT nom_courant, COUNT(*) as nombre
+FROM Animal
+INNER JOIN Espece ON Espece.id = Animal.espece_id
+WHERE SUBSTRING(nom_courant, 1, 1) = 'C'                  
+    -- Une condition dans WHERE
+GROUP BY nom_courant
+HAVING nombre > 6;                                        
+    -- Et une dans HAVING
+```
+
+:bulb: Il est cependant préférable d'utiliser la clause `WHERE` autant que possible pour toutes les conditions, sauf celles utilisant une fonction d'agrégation (les conditions `HAVING` ne sont absolument pas optimisées, à l'inverse des conditions `WHERE`)
