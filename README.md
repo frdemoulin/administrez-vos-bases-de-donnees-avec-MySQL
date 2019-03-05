@@ -21,7 +21,7 @@ Quiz : Faites vos premiers pas en MySQL et avec le langage SQL
 
 1. Index
 2. Clés primaires et étrangères
-3. Jointures
+3. [Jointures](II-index-jointures-sous-requetes/03-jointures.md)
 4. Sous-requêtes
 5. Jointures et sous-requêtes : modification de données
 6. Union de plusieurs requêtes
@@ -44,7 +44,7 @@ Quiz : Fonctions : nombres, chaînes et agrégats
 
 ### Partie 4 - Fonctions : manipulez les dates
 
-1. Obtenez la date/l'heure actuelle
+1. Obtenez la date / l'heure actuelle
 2. Formatez une donnée temporelle
 3. Calculs sur les données temporelles
 4. Exercices

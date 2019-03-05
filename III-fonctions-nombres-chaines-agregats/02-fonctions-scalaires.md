@@ -84,7 +84,15 @@ LEFT(chaine, long)  retourne les long premiers caractères de chaine en partant 
 
 #### Tri
 
-`FIELD(rech, chaine1, chaine2, chaine3, ...)` recherche le premier argument (rech) parmi les arguments suivants (chaine1, chaine2, chaine3…) et retourne l'index auquel rech est trouvé (1 si rech = chaine1, 2 si rech = chaine2…). Si rech n'est pas trouvé parmi les arguments, 0 est renvoyé.
+`FIELD(rech, chaine1, chaine2, chaine3, ...)` recherche le premier argument (`rech`) parmi les arguments suivants (`chaine1`, `chaine2`, `chaine3`...) et retourne l'index auquel `rech` est trouvé (1 si `rech = chaine1`, 2 si `rech = chaine2`...). Si `rech` n'est pas trouvé parmi les arguments, 0 est renvoyé. On peut donc l’utiliser pour trier selon un ordre arbitraire de la manière suivante :
+
+**Exemple :**
+
+```sql
+SELECT * FROM Animal ORDER BY FIELD(espece_id, 3, 1, 2);
+```
+
+Cette requête triera les lignes en donnant d’abord les animaux qui n’ont ni 3, ni 1, ni 2 comme espece_id (`FIELD()` renverra 0 pour ces lignes), suivis des animaux avec l’espece_id 3 (`FIELD()` renvoie 1), puis l’espece_id 1 et enfin l’espece_id 2.
 
 #### Code ASCII
 

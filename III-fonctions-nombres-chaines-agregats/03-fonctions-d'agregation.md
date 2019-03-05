@@ -23,7 +23,7 @@ SELECT COUNT(*) AS nb_races FROM Race;
 -- Afficher le nombre de chiens
 SELECT COUNT(*) AS nb_chiens FROM Animal
 INNER JOIN Espece ON Espece.id = Animal.espece_id
-WHERE espece.nom_courant = 'Chien';
+WHERE Espece.nom_courant = 'Chien';
 ```
 
 :bulb: `COUNT(*)` compte les lignes sans se soucier de ce qu'elles contiennent.

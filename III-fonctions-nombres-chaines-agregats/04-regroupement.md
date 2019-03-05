@@ -344,16 +344,16 @@ SELECT nom_courant, COUNT(*) as nombre
 FROM Animal
 INNER JOIN Espece ON Espece.id = Animal.espece_id
 GROUP BY nom_courant
-HAVING nombre > 6 AND SUBSTRING(nom_courant, 1, 1) = 'C'; 
+HAVING nombre > 6 AND SUBSTRING(nom_courant, 1, 1) = 'C';
     -- Deux conditions dans HAVING
 
 SELECT nom_courant, COUNT(*) as nombre
 FROM Animal
 INNER JOIN Espece ON Espece.id = Animal.espece_id
-WHERE SUBSTRING(nom_courant, 1, 1) = 'C'                  
+WHERE SUBSTRING(nom_courant, 1, 1) = 'C'
     -- Une condition dans WHERE
 GROUP BY nom_courant
-HAVING nombre > 6;                                        
+HAVING nombre > 6;
     -- Et une dans HAVING
 ```
 
