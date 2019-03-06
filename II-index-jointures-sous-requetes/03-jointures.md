@@ -274,8 +274,8 @@ ORDER BY Race.nom, Animal.nom;
 
 ```sql
 SELECT Animal.nom AS nom_animal, Race.nom AS race
-FROM Race                                               -- Table de gauche
-LEFT JOIN Animal                                        -- Table de droite
+FROM Race                                               -- table de gauche
+LEFT JOIN Animal                                        -- table de droite
     ON Animal.race_id = Race.id
 WHERE Race.espece_id = 2
 ORDER BY Race.nom, Animal.nom;
@@ -287,3 +287,116 @@ ORDER BY Race.nom, Animal.nom;
 
 ## 5. Exemples d'application et exercices
 
+A.1. Obtenir la liste des races de chiens qui sont des chiens de berger
+
+```sql
+SELECT Race.nom FROM Race
+INNER JOIN Espece ON Espece.id = Race.espece_id
+WHERE Espece.nom_courant = 'Chien' AND Race.nom LIKE 'berger%';
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![jointure_exemple_1](https://user-images.githubusercontent.com/1475600/53872602-e2279a00-3ffe-11e9-8798-c7f2e74d9606.PNG)
+</details>
+
+**Explications :** ne pas oublier la condition `Espece.nom_courant = 'chien'` car une race de chat (ou autre) pourrait très bien contenir "berger" or on a explicitement demandé les chiens
+
+A.2. Obtenir la liste des animaux (leur nom, date de naissance et race) pour lesquels on n'a aucune information sur leur pelage
+
+:warning: Dans la description des races, "pelage", "poil" ou "robe" caractérise le pelage d'un animal
+
+```sql
+SELECT Animal.nom, Animal.date_naissance, Race.nom
+FROM Animal         -- table de gauche
+LEFT JOIN Race      -- table de droite
+    ON Race.id = Animal.race_id
+WHERE (Race.description NOT LIKE '%pelage%'
+    AND Race.description NOT LIKE '%poil%'
+    AND Race.description NOT LIKE 'robe'
+    )
+    OR Race.id IS NULL;
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![jointure_exemple_2](https://user-images.githubusercontent.com/1475600/53874724-56643c80-4003-11e9-86c4-b105819d1700.PNG)
+</details>
+
+**Explications :** les animaux à sélectionner sont ceux dont :
+
+a. On ne connaît pas la race (a fortiori, on n'a alors aucune information sur le pelage de la race) ;
+
+b. On connaît la race, mais dont la description de celle-ci ne contient pas les mots-clés liés au pelage.
+
+**Détails :**
+
+**a. On ne connaît pas la race.** Les animaux dont on ne connaît pas la race ont `NULL` dans la colonne `race_id`. Mais vu que l'on fait une jointure sur cette colonne, il ne faut pas oublier de faire une __jointure externe__, sinon tous ces animaux sans race seront éliminés.
+
+Une fois que c'est fait, pour les sélectionner, il suffit de mettre la condition `Animal.race_id IS NULL`, par exemple, ou simplement `Race.#n'importe quelle colonne# IS NULL`, vu qu'il n'y a pas de correspondance avec `Race`.
+
+**b. Pas d'information sur le pelage dans la description de la race.** On sélectionne les races pour lesquelles la description ne contient pas les mots-clés. D'où l'utilisation de `NOT LIKE`.
+
+**En résumé :** il fallait faire une jointure externe des tables `Animal` et `Race`, et ensuite sélectionner les animaux qui répondaient à l'une ou l'autre des conditions (opérateur logique `OR`).
+
+B.1. Obtenir la liste des chats et des perroquets amazones, avec leur sexe, leur espèce (nom latin) et leur race s'ils en ont une. Regroupez les chats ensemble, les perroquets ensemble et, au sein de l'espèce, regroupez les races
+
+```sql
+SELECT Animal.nom AS nom_animal, Animal.sexe, Espece.nom_courant AS nom_espece, Espece.nom_latin, Race.nom AS nom_race
+FROM Animal
+INNER JOIN Espece ON Espece.id = Animal.espece_id
+LEFT JOIN Race ON Race.id = Animal.race_id
+WHERE Espece.nom_courant IN('Chat', 'Perroquet amazone')
+ORDER BY Espece.nom_latin, Race.nom;
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![jointure_exemple_b1](https://user-images.githubusercontent.com/1475600/53875950-033fb900-4006-11e9-8c77-c0c8afe09eae.PNG)
+</details>
+
+:bulb: Il est possible de mélanger jointures internes et externes. L'ordre dans lequel les jointures sont faites n'est pas important.
+
+**Explications :**
+
+:small_blue_diamond: D'abord, on fait la jointure d'`Animal` et d'`Espece`. On se retrouve alors avec une grosse table qui possède toutes les colonnes d'`Animal` et toutes les colonnes d'`Espece`. Ensuite, à cette grosse table (à la fois virtuelle et intermédiaire), on joint la table `Race`, grâce à la colonne `Animal.race_id`.
+
+:small_blue_diamond: Concernant la clause `ORDER BY`, on trie par ordre alphabétique (possible de trier sur les id de l'espèce et de la race). L'important ici était de trier d'abord sur une colonne d'`Espece`, ensuite sur une colonne de `Race`.
+
+B.2. Obtenir la liste des chiennes dont on connaît la race, qui sont en âge de procréer (c'est-à-dire nées avant juillet 2010). Affichez leurs nom, date de naissance et race.
+
+```sql
+SELECT Animal.nom AS nom_animal, Animal.sexe, Animal.date_naissance, Espece.nom_courant AS nom_espece, Race.nom AS nom_race
+FROM Animal
+INNER JOIN Espece ON Espece.id = Animal.espece_id
+INNER JOIN Race ON Race.id = Animal.race_id
+WHERE (Espece.nom_courant = 'Chien'
+    AND Animal.sexe = 'F'
+    AND Animal.date_naissance < '2010-07-01'
+    )
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![jointure_exemple_b2](https://user-images.githubusercontent.com/1475600/53876983-4a2eae00-4008-11e9-9ebb-89a79c97a1ee.PNG)
+</details>
+
+**Explications :** faire une jointure interne avec `Race`, puisque l'on veut que la race soit connue
+
+C.1. Obtenir la liste des chats dont on connaît les parents, ainsi que le nom de ces parents
+
+```sql
+
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+
+</details>
+
+**Explications :** 
