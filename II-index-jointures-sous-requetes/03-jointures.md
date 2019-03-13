@@ -287,7 +287,7 @@ ORDER BY Race.nom, Animal.nom;
 
 ## 5. Exemples d'application et exercices
 
-A.1. Obtenir la liste des races de chiens qui sont des chiens de berger
+**A.1. Obtenir la liste des races de chiens qui sont des chiens de berger**
 
 ```sql
 SELECT Race.nom FROM Race
@@ -303,7 +303,7 @@ WHERE Espece.nom_courant = 'Chien' AND Race.nom LIKE 'berger%';
 
 **Explications :** ne pas oublier la condition `Espece.nom_courant = 'chien'` car une race de chat (ou autre) pourrait très bien contenir "berger" or on a explicitement demandé les chiens
 
-A.2. Obtenir la liste des animaux (leur nom, date de naissance et race) pour lesquels on n'a aucune information sur leur pelage
+**A.2. Obtenir la liste des animaux (leur nom, date de naissance et race) pour lesquels on n'a aucune information sur leur pelage**
 
 :warning: Dans la description des races, "pelage", "poil" ou "robe" caractérise le pelage d'un animal
 
@@ -341,7 +341,7 @@ Une fois que c'est fait, pour les sélectionner, il suffit de mettre la conditio
 
 **En résumé :** il fallait faire une jointure externe des tables `Animal` et `Race`, et ensuite sélectionner les animaux qui répondaient à l'une ou l'autre des conditions (opérateur logique `OR`).
 
-B.1. Obtenir la liste des chats et des perroquets amazones, avec leur sexe, leur espèce (nom latin) et leur race s'ils en ont une. Regroupez les chats ensemble, les perroquets ensemble et, au sein de l'espèce, regroupez les races
+**B.1. Obtenir la liste des chats et des perroquets amazones, avec leur sexe, leur espèce (nom latin) et leur race s'ils en ont une. Regroupez les chats ensemble, les perroquets ensemble et, au sein de l'espèce, regroupez les races**
 
 ```sql
 SELECT Animal.nom AS nom_animal, Animal.sexe, Espece.nom_courant AS nom_espece, Espece.nom_latin, Race.nom AS nom_race
@@ -366,7 +366,7 @@ ORDER BY Espece.nom_latin, Race.nom;
 
 :small_blue_diamond: Concernant la clause `ORDER BY`, on trie par ordre alphabétique (possible de trier sur les id de l'espèce et de la race). L'important ici était de trier d'abord sur une colonne d'`Espece`, ensuite sur une colonne de `Race`.
 
-B.2. Obtenir la liste des chiennes dont on connaît la race, qui sont en âge de procréer (c'est-à-dire nées avant juillet 2010). Affichez leurs nom, date de naissance et race.
+**B.2. Obtenir la liste des chiennes dont on connaît la race, qui sont en âge de procréer (c'est-à-dire nées avant juillet 2010). Affichez leurs nom, date de naissance et race.**
 
 ```sql
 SELECT Animal.nom AS nom_animal, Animal.sexe, Animal.date_naissance, Espece.nom_courant AS nom_espece, Race.nom AS nom_race
@@ -384,19 +384,80 @@ WHERE (Espece.nom_courant = 'Chien'
 
 ![jointure_exemple_b2](https://user-images.githubusercontent.com/1475600/53876983-4a2eae00-4008-11e9-9ebb-89a79c97a1ee.PNG)
 </details>
+<br/>
 
 **Explications :** faire une jointure interne avec `Race`, puisque l'on veut que la race soit connue
 
-C.1. Obtenir la liste des chats dont on connaît les parents, ainsi que le nom de ces parents
+**C.1. Obtenir la liste des chats dont on connaît les parents, ainsi que le nom de ces parents**
 
 ```sql
-
+SELECT Animal.nom AS nom_animal, Pere.nom AS nom_pere, Mere.nom AS nom_mere, Espece.nom_courant AS espece
+FROM Animal
+INNER JOIN Animal AS Pere
+    ON Animal.pere_id = Pere.id
+INNER JOIN Animal AS Mere
+    ON Animal.mere_id = Mere.id
+INNER JOIN Espece
+    ON Espece.id = Animal.espece_id
+WHERE Espece.nom_courant = 'Chat';
 ```
 
 <details>
 <summary><b>Résultat de la requête</b></summary>
 
-
+![capture_chat_pere_mere](https://user-images.githubusercontent.com/1475600/54310186-16d4bc00-45d2-11e9-9bae-d29c25b543b3.JPG)
 </details>
 
-**Explications :** 
+**Explications :** on effectue des auto-jointures sur la table `Animal`.
+
+:small_blue_diamond: Puisque l'on veut afficher trois noms (animal, père et mère), on fait une jointure sur trois tables.
+
+:small_blue_diamond: Pour différencier les colonnes d'`Animal` dans `FROM` des colonnes d'`Animal` dans `JOIN`, on utilise des alias.
+
+**C.2. Obtenir la liste des enfants de Bouli (nom, sexe et date de naissance).**
+
+```sql
+SELECT Animal.nom, Animal.sexe, Animal.date_naissance 
+FROM Animal
+INNER JOIN Animal AS Pere
+    ON Animal.pere_id = Pere.id
+WHERE Pere.nom = 'Bouli';
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![capture_enfant_bouli](https://user-images.githubusercontent.com/1475600/54311508-040fb680-45d5-11e9-8026-c3deaea42e0b.JPG)
+</details>
+
+**C.3. Obtenir la liste des animaux dont on connaît le père, la mère, la race, la race du père, la race de la mère. Affichez le nom et la race de l'animal et de ses parents, ainsi que l'espèce de l'animal (pas des parents).**
+
+```sql
+SELECT Animal.nom AS nom_animal, Race.nom AS race_animal, Pere.nom AS nom_pere, Race_pere.nom AS race_pere, Mere.nom AS nom_mere, Race_mere.nom AS race_mere, Espece.nom_courant AS espece_animal 
+FROM Animal
+INNER JOIN Animal AS Pere
+    ON Animal.pere_id = Pere.id
+INNER JOIN Animal AS Mere
+    ON Animal.mere_id = Mere.id
+INNER JOIN Espece
+    ON Espece.id = Animal.espece_id
+INNER JOIN Race
+    ON Race.id = Animal.race_id
+INNER JOIN Race AS Race_pere
+    ON Pere.race_id = Race_pere.id
+INNER JOIN Race AS Race_mere
+    ON Mere.race_id = Race_mere.id
+WHERE (
+    Animal.pere_id IS NOT NULL
+    AND Animal.mere_id IS NOT NULL
+    AND Animal.race_id IS NOT NULL
+    AND Pere.race_id IS NOT NULL
+    AND Mere.race_id IS NOT NULL
+    );
+```
+
+<details>
+<summary><b>Résultat de la requête</b></summary>
+
+![capture_races](https://user-images.githubusercontent.com/1475600/54314061-efceb800-45da-11e9-81d7-dc8517b87fce.JPG)
+</details>
