@@ -22,7 +22,7 @@ Quiz : Faites vos premiers pas en MySQL et avec le langage SQL
 1. Index
 2. Clés primaires et étrangères
 3. [Jointures](II-index-jointures-sous-requetes/03-jointures.md)
-4. Sous-requêtes
+4. [Sous-requêtes](II-index-jointures-sous-requetes\04-sous-requetes.md)
 5. Jointures et sous-requêtes : modification de données
 6. Union de plusieurs requêtes
 7. Options des clés étrangères
